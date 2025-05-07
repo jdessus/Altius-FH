@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Suivi Chantier</title>
+  <title>Suivi Chantier v10</title>
   <style>
     .form-container {
       display: flex;
@@ -72,6 +72,11 @@
 <div>
   <br>
   <button onclick="soumettreFormulaire()">Soumettre</button>
+  <br>
+  <P>Bien faire les modifications nécessaire avant soumission des données</P>
+  <br>
+  <br>
+  <button onclick="reinitialiserDonnees()">Réinitialiser</button>
 </div>
 
 <script>
@@ -244,6 +249,28 @@
       ligne.remove();
     };
 
+    const btnDupliquer = document.createElement('button');
+    btnDupliquer.textContent = "Dupliquer";
+    btnDupliquer.onclick = function () {
+      const index = Array.from(corpsTableau.children).indexOf(ligne);
+      const original = donneesValidees[index];
+      const nouveauNom = prompt("Entrez un nouveau NOM Prénom pour la duplication :", original["NOM"]);
+
+      if (!nouveauNom) return;
+
+      const copie = { ...original };
+      copie["ID"] = genererIDUnique();
+      copie["SAISIE_TIMESTAMP"] = new Date().toISOString();
+      copie["NOM"] = nouveauNom;
+
+      donneesValidees.push(copie);
+
+      const nouvelleLigne = document.createElement('tr');
+      majLigneTableau(nouvelleLigne, copie);
+      corpsTableau.appendChild(nouvelleLigne);
+    };
+
+    tdAction.appendChild(btnDupliquer);
     tdAction.appendChild(btnModifier);
     tdAction.appendChild(btnSupprimer);
     ligne.appendChild(tdAction);
@@ -260,6 +287,26 @@
     })
     .then(() => alert("Données envoyées avec succès !"))
     .catch(err => alert("Erreur lors de l'envoi : " + err));
+  }
+
+  function reinitialiserDonnees() {
+    if (!confirm("Voulez-vous vraiment réinitialiser toutes les données ?")) return;
+
+    corpsTableau.innerHTML = "";
+    donneesValidees.length = 0;
+    indexEdition = null;
+
+    form.querySelectorAll("input").forEach(input => {
+      if (input.type === "checkbox") {
+        input.checked = false;
+      } else {
+        const champDef = configChamps.find(c => c.id === input.id);
+        input.value = champDef && champDef.value ? champDef.value : "";
+        if (input.id === "HEURE DEBUT") input.value = "00:00";
+      }
+    });
+
+    alert("Formulaire réinitialisé !");
   }
 </script>
 
