@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Suivi Chantier</title>
+  <style>
+    .form-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 60px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #990e7c;
+      color: white;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<h2>FORMULAIRE SUIVI CHANTIER</h2>
+
+<div id="formulaire" class="form-container"></div>
+
+<div>
+  <button onclick="validerChamps()">Ajouter</button>
+</div>
+
+<table>
+  <thead>
+    <tr id="entetes-tableau"></tr>
+  </thead>
+  <tbody id="corps-tableau"></tbody>
+</table>
+
+<div>
+  <br>
+  <button onclick="soumettreFormulaire()">Soumettre</button>
+</div>
+
+<script>
+  const configChamps = [
+    { nom: "ID", id: "ID", type: "hidden" }, // ID unique
+    { nom: "SAISIE_TIMESTAMP", id: "SAISIE_TIMESTAMP", type: "hidden" },
+    { nom: "CHANTIER", id: "CHANTIER", type: "text", value: "CH", required: true },
+    { nom: "DATE", id: "DATE", type: "date", required: true },
+    { nom: "NOM Prenom", id: "NOM", type: "text", required: true },
+    { nom: "HEURE DEBUT", id: "HEURE DEBUT", type: "time", required: true },
+    { nom: "HEURE FIN", id: "HEURE FIN", type: "time", required: true },
+    { nom: "DONT temps de PAUSE", id: "PAUSE", type: "time" },
+    { nom: "DONT Temps trajet ALLER", id: "ROUTEA", type: "time" },
+    { nom: "DONT Temps trajet RETOUR", id: "ROUTER", type: "time" },
+    { nom: "PANIER (repas midi)", id: "PANIER", type: "checkbox" },
+    { nom: "FRAIS REPAS", id: "REPAS", type: "checkbox" },
+    { nom: "FRAIS LOGEMENT", id: "LOGEMENT", type: "checkbox" },
+    { nom: "INTEMPERIE", id: "INTEMPERIES", type: "checkbox" },
+    { nom: "COMMENTAIRES", id: "COMMENTAIRES", type: "text" },
+    { nom: "KMS INTERIM", id: "KMS INTERIM", type: "number" },
+    { nom: "TRAJET ALLER", id: "TRAJETA", type: "checkbox" },
+    { nom: "TRAJET RETOUR", id: "TRAJETR", type: "checkbox" }
+  ];
+
+  const form = document.getElementById('formulaire');
+  const entetesTableau = document.getElementById('entetes-tableau');
+  const corpsTableau = document.getElementById('corps-tableau');
+  const donneesValidees = [];
+  let indexEdition = null;
+  let compteurID = 1;
+
+  // Génération du formulaire
+  configChamps.forEach(champ => {
+    const group = document.createElement('div');
+    group.className = 'form-group';
+    if (champ.type === "hidden") group.classList.add("hidden");
+
+    const input = document.createElement('input');
+    input.type = champ.type;
+    input.id = champ.id;
+    input.name = champ.id;
+
+    if (champ.value) input.value = champ.value;
+    if (champ.required) input.required = true;
+
+    group.innerHTML = `<label for="${champ.id}">${champ.nom}</label>`;
+    group.appendChild(input);
+    form.appendChild(group);
+
+    if (champ.type !== "hidden") {
+      const th = document.createElement('th');
+      th.textContent = champ.nom;
+      entetesTableau.appendChild(th);
+    }
+  });
+
+  // Ajout de la colonne Action dans le header
+  const thAction = document.createElement('th');
+  thAction.textContent = "Action";
+  entetesTableau.appendChild(thAction);
+
+  function genererIDUnique() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const dateStr = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate());
+    const timeStr = pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+    const idStr = `ID-${dateStr}-${timeStr}-${String(compteurID).padStart(3, '0')}`;
+    compteurID++;
+    return idStr;
+  }
+
+  function validerChamps() {
+    const requiredFields = configChamps.filter(c => c.required);
+    for (const field of requiredFields) {
+      const input = document.getElementById(field.id);
+      if (!input.value) {
+        alert(`Le champ "${field.nom}" est requis.`);
+        return;
+      }
+    }
+
+    const now = new Date();
+    document.getElementById("SAISIE_TIMESTAMP").value = now.toISOString();
+
+    if (indexEdition === null) {
+      document.getElementById("ID").value = genererIDUnique();
+    }
+
+    const entree = {};
+    configChamps.forEach(champ => {
+      const input = document.getElementById(champ.id);
+      entree[champ.id] = champ.type === "checkbox" ? input.checked : input.value;
+    });
+
+    if (indexEdition !== null) {
+      donneesValidees[indexEdition] = entree;
+      const ligne = corpsTableau.children[indexEdition];
+      majLigneTableau(ligne, entree);
+      indexEdition = null;
+    } else {
+      const ligne = document.createElement('tr');
+      donneesValidees.push(entree);
+      majLigneTableau(ligne, entree);
+      corpsTableau.appendChild(ligne);
+    }
+
+    // Réinitialiser les champs
+    form.querySelectorAll("input").forEach(input => {
+      if (input.type === "checkbox") {
+        input.checked = false;
+      } else {
+        const champDef = configChamps.find(c => c.id === input.id);
+        input.value = champDef && champDef.value ? champDef.value : "";
+      }
+    });
+  }
+
+  function majLigneTableau(ligne, entree) {
+    ligne.innerHTML = "";
+
+    configChamps.forEach(champ => {
+      if (champ.type !== "hidden") {
+        const td = document.createElement('td');
+        const value = champ.type === "checkbox"
+          ? (entree[champ.id] ? "✅" : "❌")
+          : entree[champ.id];
+        td.textContent = value;
+        ligne.appendChild(td);
+      }
+    });
+
+    const tdAction = document.createElement('td');
+
+    const btnModifier = document.createElement('button');
+    btnModifier.textContent = "Modifier";
+    btnModifier.onclick = function () {
+      indexEdition = Array.from(corpsTableau.children).indexOf(ligne);
+      const data = donneesValidees[indexEdition];
+      configChamps.forEach(champ => {
+        const input = document.getElementById(champ.id);
+        if (champ.type === "checkbox") {
+          input.checked = !!data[champ.id];
+        } else {
+          input.value = data[champ.id] || "";
+        }
+      });
+    };
+
+    const btnSupprimer = document.createElement('button');
+    btnSupprimer.textContent = "Supprimer";
+    btnSupprimer.onclick = function () {
+      const index = Array.from(corpsTableau.children).indexOf(ligne);
+      donneesValidees.splice(index, 1);
+      ligne.remove();
+    };
+
+    tdAction.appendChild(btnModifier);
+    tdAction.appendChild(btnSupprimer);
+    ligne.appendChild(tdAction);
+  }
+
+  function soumettreFormulaire() {
+    const apiURL = "https://script.google.com/macros/s/AKfycbxHujHY99QVU61YlOxC58q5gbjIbcPJMcl_br-Y8zJ7jhuXYGjFr9Vt9HWsgzYCTKkW/exec";
+
+    fetch(apiURL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(donneesValidees)
+    })
+    .then(() => alert("Données envoyées avec succès !"))
+    .catch(err => alert("Erreur lors de l'envoi : " + err));
+  }
+</script>
+
+</body>
+</html>
