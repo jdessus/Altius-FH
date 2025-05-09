@@ -50,6 +50,19 @@
       color: #444;
       margin-bottom: 10px;
     }
+    
+    .bouton-soumettre {
+	    background-color: #990e7c;
+	    color: white;
+	    padding: 10px 20px;
+	    border: none;
+	    border-radius: 5px;
+	    cursor: pointer;
+	}
+	.bouton-soumettre:hover {
+	  background-color: #7a0b63;
+	}
+	
   </style>
 </head>
 <body>
@@ -59,7 +72,7 @@
 <div id="formulaire" class="form-container"></div>
 
 <div>
-  <button onclick="validerChamps()">Ajouter</button>
+  <button onclick="validerChamps()">Ajouter / Modifier</button>
 </div>
 
 <table>
@@ -71,7 +84,7 @@
 
 <div>
   <br>
-  <button onclick="soumettreFormulaire()">Soumettre</button>
+  <button onclick="soumettreFormulaire()" class="bouton-soumettre">Soumettre</button>
   <br>
   <P>Bien faire les modifications nécessaire avant soumission des données</P>
   <br>
