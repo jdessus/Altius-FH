@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Suivi Chantier v13</title>
+  <title>Suivi Chantier v14</title>
   <style>
     .form-container {
       display: flex;
@@ -98,6 +98,7 @@
   const configChamps = [
     { nom: "ID", id: "ID", type: "hidden" },
     { nom: "SAISIE_TIMESTAMP", id: "SAISIE_TIMESTAMP", type: "hidden" },
+	{ nom: "Email", id: "EMAIL", type: "email", required: true },
     { nom: "CHANTIER", id: "CHANTIER", type: "text", value: "CH", required: true },
     { nom: "DATE", id: "DATE", type: "date", required: true },
     { nom: "NOM Prenom", id: "NOM", type: "text", required: true },
@@ -187,6 +188,15 @@
         return;
       }
     }
+
+  const emailInput = document.getElementById("EMAIL");
+  if (emailInput.value) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailInput.value)) {
+      alert("L'adresse email saisie n'est pas valide.");
+      return;
+    }
+  }
 
     const now = new Date();
     document.getElementById("SAISIE_TIMESTAMP").value = now.toISOString();
