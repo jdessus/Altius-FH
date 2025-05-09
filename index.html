@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Suivi Chantier v11</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suivi Chantier v13</title>
   <style>
     .form-container {
       display: flex;
@@ -17,15 +18,30 @@
       min-width: 60px;
     }
 
+    .form-group input {
+      min-width: 200px;
+      padding: 8px;
+      font-size: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .form-container {
+        flex-direction: column;
+      }
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+      overflow-x: auto;
+      display: block;
     }
 
     th, td {
       border: 1px solid #ccc;
       padding: 8px;
+      text-align: left;
     }
 
     th {
@@ -37,32 +53,18 @@
       display: none;
     }
 
-    .separator {
-      width: 100%;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      border-top: 2px dashed #aaa;
+    .bouton-soumettre {
+      background-color: #990e7c;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
-    .info-block {
-      width: 100%;
-      font-size: 0.9em;
-      color: #444;
-      margin-bottom: 10px;
+    .bouton-soumettre:hover {
+      background-color: #7a0b63;
     }
-    
-    .bouton-soumettre {
-	    background-color: #990e7c;
-	    color: white;
-	    padding: 10px 20px;
-	    border: none;
-	    border-radius: 5px;
-	    cursor: pointer;
-	}
-	.bouton-soumettre:hover {
-	  background-color: #7a0b63;
-	}
-	
   </style>
 </head>
 <body>
