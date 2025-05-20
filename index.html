@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Suivi Chantier v15</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suivi Chantier v19</title>
   <style>
     .form-container {
       display: flex;
@@ -11,25 +11,21 @@
       gap: 15px;
       margin-bottom: 20px;
     }
-
     .form-group {
       display: flex;
       flex-direction: column;
       min-width: 60px;
     }
-
     .form-group input {
       min-width: 200px;
       padding: 8px;
       font-size: 16px;
     }
-
     @media (max-width: 600px) {
       .form-container {
         flex-direction: column;
       }
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -37,22 +33,18 @@
       overflow-x: auto;
       display: block;
     }
-
     th, td {
       border: 1px solid #ccc;
       padding: 8px;
       text-align: left;
     }
-
     th {
       background-color: #990e7c;
       color: white;
     }
-
     .hidden {
       display: none;
     }
-
     .bouton-soumettre {
       background-color: #990e7c;
       color: white;
@@ -61,7 +53,6 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
     .bouton-soumettre:hover {
       background-color: #7a0b63;
     }
@@ -70,11 +61,10 @@
 <body>
 
 <h2>FORMULAIRE SUIVI CHANTIER</h2>
-
 <div id="formulaire" class="form-container"></div>
 
 <div>
-  <button onclick="validerChamps()">Ajouter / Modifier</button>
+  <button onclick="validerChamps()" style="font-size:14px; padding:10px 20px;">Ajouter / Modifier</button>
 </div>
 
 <table>
@@ -88,33 +78,45 @@
   <br>
   <button onclick="soumettreFormulaire()" class="bouton-soumettre">Soumettre</button>
   <br>
-  <P>Bien faire les modifications nécessaire avant soumission des données</P>
-  <br>
-  <br>
+  <p>Bien faire les modifications nécessaire avant soumission des données</p>
+  <br><br>
   <button onclick="reinitialiserDonnees()">Réinitialiser</button>
+  <div id="message-envoi" style="margin-top: 20px; font-weight: bold; color: green;"></div>
 </div>
 
 <script>
   const configChamps = [
     { nom: "ID", id: "ID", type: "hidden" },
     { nom: "SAISIE_TIMESTAMP", id: "SAISIE_TIMESTAMP", type: "hidden" },
-	{ nom: "Email", id: "EMAIL", type: "email", required: true },
-    { nom: "CHANTIER", id: "CHANTIER", type: "text", value: "CH", required: true },
-    { nom: "DATE", id: "DATE", type: "date", required: true },
-    { nom: "NOM Prenom", id: "NOM", type: "text", required: true },
-    { nom: "HEURE DEBUT", id: "HEURE DEBUT", type: "time", required: true },
-    { nom: "HEURE FIN", id: "HEURE FIN", type: "time", required: true },
+    { nom: "EMAIL*", id: "EMAIL", type: "email", required: true },
+    { nom: "CHANTIER*", id: "CHANTIER", type: "text", value: "CH", required: true },
+    { nom: "DATE*", id: "DATE", type: "date", required: true },
+    { nom: "NOM Prenom*", id: "NOM", type: "text", required: true },
+    { nom: "HEURE DEBUT*", id: "HEURE DEBUT", type: "time", required: true },
+    { nom: "HEURE FIN*", id: "HEURE FIN", type: "time", required: true },
     { nom: "DONT temps de PAUSE", id: "PAUSE", type: "time", value: "00:00" },
-    { nom: "DONT Temps trajet ALLER", id: "ROUTEA", type: "time", value: "00:00"  },
-    { nom: "DONT Temps trajet RETOUR", id: "ROUTER", type: "time", value: "00:00"  },
-    { nom: "PANIER (repas midi)", id: "PANIER", type: "checkbox" },
-    { nom: "FRAIS REPAS", id: "REPAS", type: "checkbox" },
+    {
+      nom: "DONT Temps trajet ALLER",
+      labelHTML: 'DONT Temps trajet ALLER<sup><a href="#note1" style="text-decoration:none;">1</a></sup>',
+      id: "ROUTEA",
+      type: "time",
+      value: "00:00"
+    },
+    {
+      nom: "DONT Temps trajet RETOUR",
+      labelHTML: 'DONT Temps trajet RETOUR<sup><a href="#note2" style="text-decoration:none;">2</a></sup>',
+      id: "ROUTER",
+      type: "time",
+      value: "00:00"
+    },
+    { nom: "REPAS MIDI", id: "PANIER", type: "checkbox" },
+    { nom: "REPAS SOIR", id: "REPAS", type: "checkbox" },
     { nom: "FRAIS LOGEMENT", id: "LOGEMENT", type: "checkbox" },
     { nom: "INTEMPERIE", id: "INTEMPERIES", type: "checkbox" },
     { nom: "COMMENTAIRES", id: "COMMENTAIRES", type: "text" },
     { separator: true },
-    { info: "⚠️A remplir uniquement pour les jours où le salarié ou intérimaire se déplace de sa résidence au lieu de chantier ou RDV avec son véhicule perso:" },
-    { nom: "KMS INTERIM", id: "KMS INTERIM", type: "number" },
+    { info: "⚠️A remplir uniquement si déplacement avec son véhicule perso:" },
+    { nom: "KILOMETRE", id: "KMS INTERIM", type: "number" },
     { nom: "TRAJET ALLER", id: "TRAJETA", type: "checkbox" },
     { nom: "TRAJET RETOUR", id: "TRAJETR", type: "checkbox" }
   ];
@@ -129,14 +131,11 @@
   configChamps.forEach(champ => {
     if (champ.separator) {
       const separator = document.createElement('div');
-      separator.className = "separator";
       form.appendChild(separator);
       return;
     }
-
     if (champ.info) {
       const info = document.createElement('div');
-      info.className = "info-block";
       info.textContent = champ.info;
       form.appendChild(info);
       return;
@@ -150,11 +149,13 @@
     input.type = champ.type;
     input.id = champ.id;
     input.name = champ.id;
-
     if (champ.value) input.value = champ.value;
     if (champ.required) input.required = true;
 
-    group.innerHTML = `<label for="${champ.id}">${champ.nom}</label>`;
+    const label = document.createElement('label');
+    label.setAttribute('for', champ.id);
+    label.innerHTML = champ.labelHTML || champ.nom;
+    group.appendChild(label);
     group.appendChild(input);
     form.appendChild(group);
 
@@ -189,14 +190,14 @@
       }
     }
 
-  const emailInput = document.getElementById("EMAIL");
-  if (emailInput.value) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailInput.value)) {
-      alert("L'adresse email saisie n'est pas valide.");
-      return;
+    const emailInput = document.getElementById("EMAIL");
+    if (emailInput.value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailInput.value)) {
+        alert("L'adresse email saisie n'est pas valide.");
+        return;
+      }
     }
-  }
 
     const now = new Date();
     document.getElementById("SAISIE_TIMESTAMP").value = now.toISOString();
@@ -224,7 +225,6 @@
       corpsTableau.appendChild(ligne);
     }
 
-    // Réinitialiser les champs
     form.querySelectorAll("input").forEach(input => {
       if (input.type === "checkbox") {
         input.checked = false;
@@ -237,19 +237,15 @@
 
   function majLigneTableau(ligne, entree) {
     ligne.innerHTML = "";
-
     configChamps.forEach(champ => {
       if (!champ.id || champ.type === "hidden") return;
       const td = document.createElement('td');
-      const value = champ.type === "checkbox"
-        ? (entree[champ.id] ? "✅" : "❌")
-        : entree[champ.id];
+      const value = champ.type === "checkbox" ? (entree[champ.id] ? "✅" : "") : entree[champ.id];
       td.textContent = value;
       ligne.appendChild(td);
     });
 
     const tdAction = document.createElement('td');
-
     const btnModifier = document.createElement('button');
     btnModifier.textContent = "Modifier";
     btnModifier.onclick = function () {
@@ -280,16 +276,12 @@
       const index = Array.from(corpsTableau.children).indexOf(ligne);
       const original = donneesValidees[index];
       const nouveauNom = prompt("Entrez un nouveau NOM Prénom pour la duplication :", original["NOM"]);
-
       if (!nouveauNom) return;
-
       const copie = { ...original };
       copie["ID"] = genererIDUnique();
       copie["SAISIE_TIMESTAMP"] = new Date().toISOString();
       copie["NOM"] = nouveauNom;
-
       donneesValidees.push(copie);
-
       const nouvelleLigne = document.createElement('tr');
       majLigneTableau(nouvelleLigne, copie);
       corpsTableau.appendChild(nouvelleLigne);
@@ -303,24 +295,26 @@
 
   function soumettreFormulaire() {
     const apiURL = "https://script.google.com/macros/s/AKfycbwvsKaklxsgLxwVhcCR4Ihem5OWCk57IwZNm5Mwsz9sQSJMPGzcdb8z87BYQrFZrJPs/exec";
-
     fetch(apiURL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(donneesValidees)
     })
-    .then(() => alert("Données envoyées avec succès !"))
-    .catch(err => alert("Erreur lors de l'envoi : " + err));
+    .then(() => {
+      document.getElementById("message-envoi").textContent = "✅ Merci, vos données ont bien été envoyées.";
+      reinitialiserTableauSansAlerte();
+    })
+    .catch(err => {
+      document.getElementById("message-envoi").textContent = "❌ Erreur lors de l'envoi : " + err;
+    });
   }
 
   function reinitialiserDonnees() {
     if (!confirm("Voulez-vous vraiment réinitialiser toutes les données ?")) return;
-
     corpsTableau.innerHTML = "";
     donneesValidees.length = 0;
     indexEdition = null;
-
     form.querySelectorAll("input").forEach(input => {
       if (input.type === "checkbox") {
         input.checked = false;
@@ -330,10 +324,32 @@
         if (input.id === "HEURE DEBUT") input.value = "00:00";
       }
     });
-
     alert("Formulaire réinitialisé !");
   }
+
+  function reinitialiserTableauSansAlerte() {
+    corpsTableau.innerHTML = "";
+    donneesValidees.length = 0;
+    indexEdition = null;
+    form.querySelectorAll("input").forEach(input => {
+      if (input.type === "checkbox") {
+        input.checked = false;
+      } else {
+        const champDef = configChamps.find(c => c.id === input.id);
+        input.value = champDef && champDef.value ? champDef.value : "";
+        if (input.id === "HEURE DEBUT") input.value = "00:00";
+      }
+    });
+  }
 </script>
+
+<!-- Notes de bas de page -->
+<p style="font-size: 0.8em;" id="note1"><sup>1</sup> </p>
+<p style="font-size: 0.8em;" id="note2"><sup>2</sup> </p>
+
+</body>
+</html>
+
 
 </body>
 </html>
