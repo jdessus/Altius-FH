@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Suivi Chantier v19</title>
+  <title>Suivi Chantier v23</title>
   <style>
     .form-container {
       display: flex;
@@ -55,7 +55,7 @@
     }
     .bouton-soumettre:hover {
       background-color: #7a0b63;
-    }
+
   </style>
 </head>
 <body>
@@ -76,10 +76,10 @@
 
 <div>
   <br>
-  <button onclick="soumettreFormulaire()" class="bouton-soumettre">Soumettre</button>
+  <p><strong>Bien faire les modifications nécessaires avant soumission des données : </strong></p>
   <br>
-  <p>Bien faire les modifications nécessaire avant soumission des données</p>
-  <br><br>
+  <button onclick="soumettreFormulaire()" class="bouton-soumettre">Valider FH</button>
+  <br><br><br>
   <button onclick="reinitialiserDonnees()">Réinitialiser</button>
   <div id="message-envoi" style="margin-top: 20px; font-weight: bold; color: green;"></div>
 </div>
@@ -88,23 +88,47 @@
   const configChamps = [
     { nom: "ID", id: "ID", type: "hidden" },
     { nom: "SAISIE_TIMESTAMP", id: "SAISIE_TIMESTAMP", type: "hidden" },
-    { nom: "EMAIL*", id: "EMAIL", type: "email", required: true },
+    {
+      nom: "EMAIL*",
+      labelHTML: 'EMAIL*<sup><a href="#note1" style="text-decoration:none;">1</a></sup>',
+      id: "EMAIL",
+      type: "email",
+      required: true
+    },
     { nom: "CHANTIER*", id: "CHANTIER", type: "text", value: "CH", required: true },
     { nom: "DATE*", id: "DATE", type: "date", required: true },
-    { nom: "NOM Prenom*", id: "NOM", type: "text", required: true },
-    { nom: "HEURE DEBUT*", id: "HEURE DEBUT", type: "time", required: true },
-    { nom: "HEURE FIN*", id: "HEURE FIN", type: "time", required: true },
-    { nom: "DONT temps de PAUSE", id: "PAUSE", type: "time", value: "00:00" },
+    { nom: "NOM Prenom Intervenant*", id: "NOM", type: "text", required: true },
+    {
+      nom: "HEURE DEBUT*",
+      labelHTML: 'HEURE DEBUT*<sup><a href="#note2" style="text-decoration:none;">2</a></sup>',
+      id: "HEURE DEBUT",
+      type: "time",
+      required: true
+    },	
+    {
+      nom: "HEURE FIN*",
+      labelHTML: 'HEURE FIN*<sup><a href="#note3" style="text-decoration:none;">3</a></sup>',
+      id: "HEURE FIN",
+      type: "time",
+      required: true
+    },		
+	    {
+      nom: "DONT temps de PAUSE",
+      labelHTML: 'DONT temps de PAUSE<sup><a href="#note4" style="text-decoration:none;">4</a></sup>',
+      id: "PAUSE",
+      type: "time",
+      value: "00:00"
+    },
     {
       nom: "DONT Temps trajet ALLER",
-      labelHTML: 'DONT Temps trajet ALLER<sup><a href="#note1" style="text-decoration:none;">1</a></sup>',
+      labelHTML: 'DONT Temps trajet ALLER<sup><a href="#note4" style="text-decoration:none;">4</a></sup>',
       id: "ROUTEA",
       type: "time",
       value: "00:00"
     },
     {
       nom: "DONT Temps trajet RETOUR",
-      labelHTML: 'DONT Temps trajet RETOUR<sup><a href="#note2" style="text-decoration:none;">2</a></sup>',
+      labelHTML: 'DONT Temps trajet RETOUR<sup><a href="#note5" style="text-decoration:none;">5</a></sup>',
       id: "ROUTER",
       type: "time",
       value: "00:00"
@@ -294,12 +318,15 @@
   }
 
   function soumettreFormulaire() {
-    const apiURL = "https://script.google.com/macros/s/AKfycbwvsKaklxsgLxwVhcCR4Ihem5OWCk57IwZNm5Mwsz9sQSJMPGzcdb8z87BYQrFZrJPs/exec";
+    const apiURL = "https://script.google.com/macros/s/AKfycbyexnjKADhL4p2McCI-pnXCSAKGVLaDOFkhLR3JJ6SodhkgrGiku-ZhviuqkAkstqmU/exec";
     fetch(apiURL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(donneesValidees)
+      body: JSON.stringify({
+        data: donneesValidees,
+        sendEmail: true
+      })
     })
     .then(() => {
       document.getElementById("message-envoi").textContent = "✅ Merci, vos données ont bien été envoyées.";
@@ -344,12 +371,13 @@
 </script>
 
 <!-- Notes de bas de page -->
-<p style="font-size: 0.8em;" id="note1"><sup>1</sup> </p>
-<p style="font-size: 0.8em;" id="note2"><sup>2</sup> </p>
-
-</body>
-</html>
-
+<p style="font-size: 0.7em;" id="note1"><sup>1</sup> Email du chef de chantier</p>
+<p style="font-size: 0.7em;" id="note2"><sup>2</sup> Heure d'arrivée dans les locaux d'Altius ou heure d'arrivée sur le chantier (si embauche sur le chantier)</p>
+<p style="font-size: 0.7em;" id="note3"><sup>3</sup> Selon les mêmes règles que les heures de début</p>
+<p style="font-size: 0.7em;" id="note4"><sup>4</sup> Entre Altius France et le chantier. Seul le temps passé dans le véhicule est indiqué.</p>
+<p style="font-size: 0.7em;" id="note5"><sup>5</sup> Entre le chantier et Altius France.</p>
+<p style="font-size: 0.7em;" id="note5">NB: les temps de deplacement entre le lieu de chantier et le lieu d'herbergement en grand déplacement (hôtel,gite...) ne sont pas à noter.</p>
+<p style="font-size: 0.7em;" id="note6"><sup>6</sup> Temps de pause : le temps de pause minimum légal est de 45 min pour la mi-journée. NB: "Dés que le temps de travail quotidien atteint six heures, le salarié bénéficie d'un temps de pause d'une durée minimale de vingt minutes consécutives."</p>
 
 </body>
 </html>
