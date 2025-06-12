@@ -96,6 +96,7 @@
       required: true
     },
     { nom: "CHANTIER*", id: "CHANTIER", type: "text", value: "CH", required: true },
+    { nom: "LIEU de chantier*", id: "LIEU_CHANTIER", type: "text", required: true },
     { nom: "DATE*", id: "DATE", type: "date", required: true },
     { nom: "NOM Prenom Intervenant*", id: "NOM", type: "text", required: true },
     {
@@ -318,7 +319,7 @@
   }
 
   function soumettreFormulaire() {
-    const apiURL = "https://script.google.com/macros/s/AKfycbyexnjKADhL4p2McCI-pnXCSAKGVLaDOFkhLR3JJ6SodhkgrGiku-ZhviuqkAkstqmU/exec";
+    const apiURL = "https://script.google.com/macros/s/AKfycbxfIAlZzmzfN1oEbgDFhJJO2jK7d5OrLBBLXEvvRedRmfo8Uha3Obswd4w3TGAJkSSp/exec";
     fetch(apiURL, {
       method: "POST",
       mode: "no-cors",
